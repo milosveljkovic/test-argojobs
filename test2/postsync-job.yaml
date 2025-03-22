@@ -11,12 +11,12 @@ spec:
   template:
     spec:
       containers:
-      image: bitnami/kubectl:latest  # You can use any image with kubectl
-      command:
-        - /bin/sh
-        - -c
-        - |
-          echo "Scaling down deployment..."
-          kubectl get namespace
-          kubectl get jobs -n scen2
+      - image: bitnami/kubectl:latest  # You can use any image with kubectl
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Scaling down deployment..."
+            kubectl get namespace
+            kubectl get jobs -n scen2
       restartPolicy: Never
