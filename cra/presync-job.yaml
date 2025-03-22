@@ -12,7 +12,7 @@ spec:
     spec:
       serviceAccountName: clean-up-sa
       containers:
-      - name: clean-up-job
+      - name: prepare-job
         image: bitnami/kubectl:latest  # You can use any image with kubectl
         command:
           - /bin/sh
