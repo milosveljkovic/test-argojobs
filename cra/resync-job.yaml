@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: clean-up
+  name: prepare-job
   namespace: automated-testing
   annotations:
     argocd.argoproj.io/hook: PostSync
@@ -18,10 +18,10 @@ spec:
           - /bin/sh
           - -c
           - |
-            echo "Scaling down deployment..."
+            echo "Scaling up deployments..."
             kubectl get namespace
             kubectl get jobs -n automated-testing
             echo "Stop simulator..."
-            kubectl scale deployment sim --replicas=0 -n automated-testing
-            kubectl scale deployment cra-and-sca --replicas=0 -n automated-testing
+            kubectl scale deployment sim --replicas=1 -n automated-testing
+            kubectl scale deployment cra-and-sca --replicas=1 -n automated-testing
       restartPolicy: Never
