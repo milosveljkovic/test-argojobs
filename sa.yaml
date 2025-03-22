@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: clean-up-sa
-  namespace: scen2
+  namespace: automated-testing
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -20,7 +20,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: clean-up-sa
-    namespace: scen2
+    namespace: automated-testing
 roleRef:
   kind: ClusterRole
   name: clean-up-role
