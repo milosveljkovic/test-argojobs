@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cra-and-sca
+  namespace: automated-testing
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: cra
+        image: nginx:1.14.1
+        ports:
+        - containerPort: 80
+      - name: sca
+        image: busybox
+        command: ["sleep", "999999"] 

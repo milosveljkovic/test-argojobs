@@ -1,9 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: test123
-  # generateName: job-clean-up-
-  namespace: scen2
+  name: clean-up
+  namespace: automated-testing
   annotations:
     argocd.argoproj.io/hook: PostSync
 spec:
@@ -22,5 +21,6 @@ spec:
             echo "Scaling down deployment..."
             kubectl get namespace
             kubectl get jobs -n scen2
-            # kubectl scale deployment nginx-deployment --replicas=0 -n scen2
+            echo "Stop simulator..."
+            kubectl scale deployment sim --replicas=0 -n scen2
       restartPolicy: Never

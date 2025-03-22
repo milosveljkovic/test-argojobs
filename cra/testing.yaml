@@ -1,8 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  generateName: job-clean-up-
-  namespace: senario1
+  namespace: automated-testing
   annotations:
     argocd.argoproj.io/hook: Sync
 spec:
@@ -11,7 +10,7 @@ spec:
   template:
     spec:
       containers:
-      - name: jobtest
+      - name: run-test
         image: busybox
-        command: ["sleep", "180"] 
+        command: ["sleep", "30"] 
       restartPolicy: Never
