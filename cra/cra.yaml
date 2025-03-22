@@ -4,7 +4,6 @@ metadata:
   name: cra-and-sca
   namespace: automated-testing
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: cra-and-sca
