@@ -20,7 +20,7 @@ spec:
           - |
             echo "Scaling down deployment..."
             kubectl get namespace
-            kubectl get jobs -n scen2
+            kubectl get jobs -n automated-testing
             echo "Stop simulator..."
-            kubectl scale deployment sim --replicas=0 -n scen2
+            kubectl scale deployment sim --replicas=0 -n automated-testing
       restartPolicy: Never
