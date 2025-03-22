@@ -1,12 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sim
+  name: sim2
   namespace: automated-testing
   labels:
     app: nginx
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: sim
