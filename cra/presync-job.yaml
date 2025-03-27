@@ -72,7 +72,7 @@ data:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: prepare-job1
+  generateName: prepare-job-
   namespace: automated-testing
   annotations:
     test: "test1234"
@@ -91,9 +91,7 @@ spec:
         - -c
         - |
           cp /scripts/script.sh /tmp/script.sh
-          ls /tmp/
           chmod +x /tmp/*.sh
-          ls -al /tmp/
           echo "execute script.sh now"
           /tmp/script.sh
         volumeMounts:
