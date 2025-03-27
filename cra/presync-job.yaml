@@ -75,7 +75,7 @@ metadata:
   name: prepare-job1
   namespace: automated-testing
   annotations:
-    test: 1
+    test: "test123"
 spec:
   backoffLimit: 10
   completions: 1
