@@ -3,10 +3,10 @@ kind: Job
 metadata:
   name: prepare-job
   namespace: automated-testing
-  annotations:
-    argocd.argoproj.io/hook: Sync
+  # annotations:
+  #   argocd.argoproj.io/hook: Sync
 spec:
-  backoffLimit: 1
+  backoffLimit: 10
   completions: 1
   template:
     spec:
