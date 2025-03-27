@@ -82,18 +82,22 @@ spec:
       serviceAccountName: clean-up-sa
       containers:
       - name: script-runner
-        image: busybox  # Use an image with /bin/sh support
-        command: ["/bin/sh", "-c", "chmod +x /scripts/script.sh && /scripts/script.sh"]
+        image: bitnami/kubectl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          cp /scripts/script.sh /tmp/script.sh
+          ls /tmp/
+          chmod +x /tmp/*.sh
+          ls -al /tmp/
+          echo "execute script.sh now"
+          /tmp/script.sh
         volumeMounts:
         - name: script-volume
           mountPath: /scripts
-        - name: config-volume
-          mountPath: /etc/configmap
       volumes:
-      - name: script-volume
-        configMap:
-          name: manage-jobs-script
-          defaultMode: 0777  # Ensure execute permission
-            
-
+        - name: script-volume
+          configMap:
+            name: manage-jobs-script
       restartPolicy: Never
