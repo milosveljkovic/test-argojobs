@@ -74,6 +74,8 @@ kind: Job
 metadata:
   name: prepare-job1
   namespace: automated-testing
+  annotations:
+    test: 1
 spec:
   backoffLimit: 10
   completions: 1
