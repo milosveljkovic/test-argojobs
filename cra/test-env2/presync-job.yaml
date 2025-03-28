@@ -83,7 +83,7 @@ spec:
   completions: 1
   template:
     spec:
-      serviceAccountName: configjob1-sa
+      serviceAccountName: configjob2-sa
       containers:
       - name: script-runner
         image: bitnami/kubectl:latest
