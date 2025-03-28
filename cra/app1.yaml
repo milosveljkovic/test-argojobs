@@ -4,7 +4,7 @@ metadata:
   name: testenv1
 spec:
   destination:
-    namespace: ''
+    namespace: 'argocd'
     server: https://kubernetes.default.svc
   source:
     path: cra/test-env1
