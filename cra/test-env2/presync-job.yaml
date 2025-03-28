@@ -1,0 +1,105 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: manage-jobs-script
+  namespace: automated-testing2
+data:
+  script.sh: |
+    #!/bin/bash
+    set -eo pipefail
+
+    JOB_NAME_PATTERN="all"
+    CONFIG_NAME="testconfig"
+    TEST_CONTAINER_NAME="runtest"
+    NAMESPACE="automated-testing2"
+    CONF_START=0
+    CONF_END=4
+
+    if [[ ! $(kubectl get cronjob "${JOB_NAME_PATTERN}" -n "${NAMESPACE}" --no-headers) ]];then
+        echo "FAIL..."
+    fi
+    echo "The CronJob exist..."
+    echo "---"
+
+    for ((i=0; i<=${CONF_END}; i++)); do
+        echo "• Creating test ${JOB_NAME_PATTERN}-${i}..."
+        echo "• Prepare configMap ${CONFIG_NAME} for test ${JOB_NAME_PATTERN}-${i}..."
+        kubectl create configmap "${CONFIG_NAME}" \
+            -n "${NAMESPACE}" \
+            --from-literal=config${i}=this-is-config-${i} \
+            -o yaml --dry-run=client | kubectl apply -f -
+        
+        echo "• Creating test job ${JOB_NAME_PATTERN}-${i}..."
+        kubectl create job --from=cronjob/${JOB_NAME_PATTERN} "${JOB_NAME_PATTERN}-${i}" -n "${NAMESPACE}"
+        echo "• Test job created! Waiting for complete status of runtest container..."
+        sleep 5
+        while true; do
+            pod_name=$(kubectl get pods -n "${NAMESPACE}" --no-headers -o custom-columns=":metadata.name,:status.phase" | grep "${JOB_NAME_PATTERN}-${i}" | awk '{print $1}')
+            if [[ -z "${pod_name}" ]];then
+                echo "• The pod(${pod_name}) does not exist yet..."
+                echo "• Waiting 5 sec..."
+            else
+                echo "• Gotcha pod... $pod_name"
+                break
+            fi
+            sleep 5
+        done
+        while true; do
+            runtest=$(kubectl \
+                get pod "${pod_name}" \
+                -n "${NAMESPACE}" \
+                -o json \
+                | jq -r --arg cname "${TEST_CONTAINER_NAME}" '.status.containerStatuses[] | select(.name==$cname) | .state | keys[0]')
+            if [[ "${runtest}" != "terminated" ]];then
+                echo "• runtest status.. $runtest"
+            else
+                echo "• runtest status.. $runtest"
+                break
+            fi
+            sleep 5
+        done
+        echo "• Seems like that pod(${pod_name}) is completed!"
+        echo "Clean up..."
+        kubectl delete job/${JOB_NAME_PATTERN}-${i} -n "${NAMESPACE}"
+        echo "---"
+        echo
+    done
+
+    if [[ "${i}" == "${CONF_END}" ]];then
+        echo "All tests have been ran..."
+    fi
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: prepare-job-
+  namespace: automated-testing2
+  annotations:
+    test: "test1234"
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 10
+  completions: 1
+  template:
+    spec:
+      serviceAccountName: clean-up-sa
+      containers:
+      - name: script-runner
+        image: bitnami/kubectl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          cp /scripts/script.sh /tmp/script.sh
+          chmod +x /tmp/*.sh
+          echo "execute script.sh now"
+          /tmp/script.sh
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+      volumes:
+        - name: script-volume
+          configMap:
+            name: manage-jobs-script
+      restartPolicy: Never
