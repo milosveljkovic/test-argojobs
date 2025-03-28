@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configTest
+  namespace: automated-testing
+spec:
+  selector:
+    matchLabels:
+      app: configTest
+  template:
+    metadata:
+      labels:
+        app: configTest
+    spec:
+      serviceAccountName: clean-up-sa
+      containers:
+      - name: configTets
+        image: bitnami/kubectl:latest  # You can use any image with kubectl
+        env:
+        - name: CONF_FROM
+          value: "1"
+        - name: CONF_TO
+          value: "5"
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "Preparing configMap for test..."
+            echo "Pulling config from s3..."
+            echo "Creating configMap with ${CONF_FROM} values"
+            kubectl create configmap automated-testing --from-literal=key1=${CONF_FROM} --from-literal=key2=${CONF_FROM}
+            echo "ConfigMap created..."
+            echo "waithing for test job to finish..."
+            for i in {1..10};then
+              echo "Checking for test-pod..."
+              kubectl wait --for=condition=Ready pod/test-pod
+            done
