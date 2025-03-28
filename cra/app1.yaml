@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: testenv1
+spec:
+  destination:
+    namespace: ''
+    server: https://kubernetes.default.svc
+  source:
+    path: cra/test-env1
+    repoURL: https://github.com/milosveljkovic/test-argojobs.git
+    targetRevision: HEAD
+  sources: []
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
