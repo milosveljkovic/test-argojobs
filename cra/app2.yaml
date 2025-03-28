@@ -2,9 +2,10 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: testenv2
+  namespace: argocd
 spec:
   destination:
-    namespace: ''
+    namespace: automated-testing2
     server: https://kubernetes.default.svc
   source:
     path: cra/test-env2
