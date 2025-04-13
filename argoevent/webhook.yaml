@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: webhook
+spec:
+  service:
+    ports:
+      - port: 8080
+        targetPort: 8080
+  webhook:
+    my-webhook:
+      port: "8080"
+      endpoint: /webhook
+      method: POST
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: my-sensor
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+  - name: my-sensor
+    eventSourceName: webhook
+    eventName: my-webhook
+  triggers:
+  - template:
+      name: my-sensor
+      k8s:
+        group: ""
+        version: v1
+        resource: pods
+        operation: create
+        source:
+          resource:
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              generateName: my-sensor-
+              labels:
+                app: my-sensor
+            spec:
+              containers:
+              - name: hello
+                image: alpine
+                command: ["echo"]
+                args: ["This is the message you sent me:\n", ""]
+              restartPolicy: Never
+        parameters:
+          - src:
+              dependencyName: my-sensor
+              dataKey: body.comment
+            dest: spec.containers.0.args.1

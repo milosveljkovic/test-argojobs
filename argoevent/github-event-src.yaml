@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: EventSource
+metadata:
+  name: github-pr
+spec:
+  service:
+    ports:
+      - name: github-pr
+        port: 12000
+        targetPort: 12000
+  github:
+    pr-comment:
+      repositories:
+        - owner: milosveljkovic
+          names:
+            - test-argojobs
+      webhook:
+        endpoint: /webhook/events
+        port: "12000"
+        method: POST
+        url: https://<url>
+      events:
+        - "*"
+      # githubApp:
+      #  privateKey:
+      #    # Name of the K8s secret
+      #    name: github-app-pem
+      #    # Key within the K8s secret
+      #    key: privateKey.pem
+      #  appID: <app id>
+      #  installationID: <app_installation_id>
+      apiToken:
+        name: github-pat
+        key: token
+      webhookSecret:
+       name: github-pat
+       key: secret
+      insecure: true
+      active: true
+      contentType: json
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Sensor
+metadata:
+  name: pr-comment-trigger-test
+spec:
+  template:
+    serviceAccountName: argo-events-sa
+  dependencies:
+  - name: payload
+    eventSourceName: github-pr
+    eventName: pr-comment
+  triggers:
+  - template:
+      name: payload
+      k8s:
+        group: ""
+        version: v1
+        resource: pods
+        operation: create
+        source:
+          resource:
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              generateName: payload-
+              labels:
+                app: payload
+            spec:
+              containers:
+              - name: hello
+                image: alpine
+                command: ["echo"]
+                args: ["This is the message you sent me:\n", ""]
+              restartPolicy: Never
+        parameters:
+          - src:
+              dependencyName: payload
+              dataKey: body.comment.body
+            dest: spec.containers.0.args.1
